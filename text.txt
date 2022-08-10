@@ -1,0 +1,22 @@
+First I added the brute force solution and the greedy solution.
+Greedy alg:
+  At every point you take the closest element
+  Slowly move through it.
+  Fast, n*n speed
+  Quite bad at all of that calculation
+
+naive
+  This implementation of the naive solution  not the best. 
+  Even the dynamix solution, without the dynamic part is faster (there I can process 2 more)
+  The reason why it is implemented in th3e way that it is is so that it can be animated easier
+  There is also a million solutions already so there is no need to reinvent the warm temp
+  Loops through all permutations
+  8 is the max although using the non dynamic version of the dynamix solution would have pushed that to around 10
+
+Dynamic
+  One that I have written a few times before as it was an importaint part of the competative programming 
+  Similar to the brut solution with the only difference that we knowthat we are at vertex v and we have visited verticies [v_0,...v_k]
+  then it does not matter in what order so we can go from fact to exp
+  Bitshifting used 
+  We can go to about 20 or so, doubling the amount
+

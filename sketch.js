@@ -27,6 +27,9 @@ class TSP {
     if (alg == "dynamic") {
       this.solveDynamic(an);
     }
+    if (alg == "aco") {
+      this.solveACO(an);
+    }
   }
 
   //function to populate nodes
@@ -68,8 +71,15 @@ class TSP {
         }
         this.calculateShortestDistance();
       }
+      if (this.solvingType == "aco") {
+        this.updateAntColonies();
+        if (this.stepCount > 10000000) {
+          this.stepCount = -1;
+          this.solvingType = "";
+        }
+      }
     }
-  }
+  } 
 
   calculateShortestDistance() {
     this.shortestDistance = 0;
@@ -86,7 +96,6 @@ class TSP {
   evaluatePermutation(permutation) {
     drawPath(permutation);
     let distance = 0;
-    //console.log(permutation);
     for (let i = 0; i < permutation.length - 1; i++) {
       distance += permutation[i].distanceTo(permutation[i + 1]);
     }
@@ -115,7 +124,6 @@ class TSP {
       //solve tsp with brute force
       for (let i = 0; i < this.allPermutationsOfNodes.length; i++) {
         this.evaluatePermutation(this.allPermutationsOfNodes[i]);
-        //console.log(i / this.allPermutationsOfNodes.length);
       }
     }
   }
@@ -156,6 +164,9 @@ class TSP {
   }
 
   solveDynamic(isAnimated) {
+    if (this.nodes.length > 20) {
+      alert("20 is the max for a reasonable solution of this type");
+    }
     this.shortestDistance = Infinity;
     this.shortestPath = [];
     if (isAnimated) {
@@ -168,6 +179,74 @@ class TSP {
     this.shortestPath = [];
     for (let i = 0; i < tempPath.length; i++) {
       this.shortestPath.push(this.nodes[tempPath[i]]);
+    }
+  }
+
+  updateAntColonies() {
+    this.ant_r = simulateNAnts(
+      this.ant_d,
+      this.ant_r,
+      this.ant_alpha,
+      this.ant_beta,
+      this.ant_decay,
+      this.ant_number_of_ants,
+      this.nodes
+    );
+    let curr = 0;
+    let visited = new Set();
+    this.shortestPath = [];
+    while(visited.size != this.nodes.length) {
+      visited.add(curr);
+      this.shortestPath.push(this.nodes[curr]);
+      let minn = -Infinity;
+      let minnIndex = -1;
+      for (let i = 0; i < this.nodes.length; i++) {
+        if(!visited.has(i)) {
+          if(this.ant_r[curr][i] > minn) {
+            minn = this.ant_r[curr][i];
+            minnIndex = i;
+          }
+        }
+      }
+      curr = minnIndex;
+    }
+    this.calculateShortestDistance();
+  }
+
+  solveACO(isAnimated) {
+    this.ant_alpha = document.getElementById("ant_alpha").value;
+    this.ant_beta = document.getElementById("ant_beta").value;
+    this.ant_decay = document.getElementById("ant_decay").value;
+    this.ant_number_of_ants = document.getElementById("ant_number").value;
+
+    if (isAnimated) {
+      this.shortestDistance = Infinity;
+      this.shortestPath = [];
+      this.stepCount = 0;
+      this.solvingType = "aco";
+      this.ant_d = [];
+      this.ant_r = [];
+      for (let i = 0; i < this.nodes.length; i++) {
+        this.ant_d.push([]);
+        this.ant_r.push([]);
+        for (let j = 0; j < this.nodes.length; j++) {
+          this.ant_d[i].push(this.nodes[i].distanceTo(this.nodes[j]));
+          this.ant_r[i].push(1);
+        }
+      }
+    } else {
+      let total = 0;
+      let path = [];
+      [total, path] = antColonyOpt(
+        this.nodes,
+        alpha,
+        beta,
+        decay,
+        number_of_ants,
+        number_of_iterations
+      );
+      this.shortestDistance = total;
+      this.shortestPath = path;
     }
   }
 }
@@ -249,10 +328,9 @@ function findShortestPathDynamic(nodes) {
   }
 
   function tsp(curr, visited) {
-    console.log(curr, visited);
     if (visited == (1 << nodes.length) - 1) {
-        DP[curr][visited] = null;
-        return [d[curr][0], null];
+      DP[curr][visited] = null;
+      return [d[curr][0], null];
     }
 
     if (DP[curr][visited] != undefined) {
@@ -280,17 +358,14 @@ function findShortestPathDynamic(nodes) {
   let path = [];
   let curr = 0;
   let bitmap = 1;
-  console.log(DP);
   do {
     path.push(curr);
-    console.log(curr, bitmap);
     curr = DP[curr][bitmap];
-    if(curr != null) {
-        curr = curr[1];
-        bitmap = intAdd(bitmap, curr);
+    if (curr != null) {
+      curr = curr[1];
+      bitmap = intAdd(bitmap, curr);
     }
   } while (curr != null);
-  console.log("Dynamic ", ans);
   return [ans, path];
 }
 
@@ -359,7 +434,6 @@ function permutations(inputArr) {
 }
 
 function closestNodeToNodeNotINArray(node, array, nodes) {
-  //console.log(node, array, nodes);
   let closestNode = null;
   let closestDistance = Infinity;
   for (let i = 0; i < nodes.length; i++) {
@@ -393,7 +467,7 @@ let solvingType = "";
 //p5js setup function
 function setup() {
   frameRate(20);
-  tsp.populateNodes(6);
+  tsp.populateNodes(10);
   createCanvas(screenWidth, screenHeight);
   background(background_color);
 }
@@ -425,5 +499,11 @@ function draw() {
       10,
       80
     );
+  }
+
+  if (document.getElementById("algorithm").value == "aco") {
+    document.getElementById("acoInput").style.visibility = "visible";
+  } else {
+    document.getElementById("acoInput").style.visibility = "hidden";
   }
 }

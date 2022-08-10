@@ -15,18 +15,18 @@
 		<!-- input for numbers between 2 and 200 -->
 		Traveling Salesman Problem -/-
 
-		<input type="number" id="numberOfNodes" min="2" max="200" value="7">
+		<input type="number" id="numberOfNodes" min="2" max="200" value="40">
 		|
 		<button onclick="tsp.populateNodes(document.getElementById('numberOfNodes').value);" class="">
 			Generate
 		</button>
 		<!-- select with 5 options -->
 		|
-		<select id="algorithm">
+		<select id="algorithm" onchange="tsp.stepCount = -1;">
+			<option value="aco">Ant colony opt.</option>
 			<option value="dynamic">Dynamic</option>
 			<option value="naive">Brute force</option>
 			<option value="greedy">Greedy</option>
-			<option value="random">Random</option>
 			<option value="annealing">Annealing</option>
 		</select>
 		|
@@ -39,14 +39,23 @@
 		|
 		<input type="checkbox" id="showMST" value="true" checked> (Show MST)
 		|
-		<button>
-			Optimize with 2
-		</button>
-		<button>
-			Optimize with 3
-		</button>
+		<select id="opt_alg" onchange="tsp.optimizeSolution()">
+			<option value="aco">Opt 2</option>
+			<option value="dynamic">Opt 3</option>
+			<option value="naive">Crossings</option>
+		</select>
+		<button>Optimize</button> |
 		|<input type="number" id="speed" min="2" max="200" value="60">
 		(Framerate)|
+		<div id="acoInput">
+			<button onclick="tsp.stepCount = -1; tsp.solvingType = ''" > Stop sim </button>
+			<input type="number" min="1" max="200" value="40" id="ant_number"> #ants |
+			<input type="number" min="0" max="10" value="1" step="0.25" id="ant_alpha"> #alpha |
+			<input type="number" min="0" max="10" value="2" step="0.25" id="ant_beta"> #beta |
+			<input type="number" min="0" max="1" value="0.15" step="0.05" id="ant_decay"> #decay |
+			<input type="number" min="0" max="1000" value="100" step="1" id="ant_c"> #c |
+			<input type="checkbox" id="ant_showTrails" checked> (Show trails)
+		</div>
 
 	</div>
 
@@ -57,6 +66,7 @@
 	<script src="libraries/p5.sound.js" type="text/javascript"></script>
 
 	<script src="sketch.js" type="text/javascript"></script>
+	<script src="antcolony.js" type="text/javascript"></script>
 
 	<style>
 		body {
