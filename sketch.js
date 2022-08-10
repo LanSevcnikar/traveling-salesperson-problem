@@ -24,6 +24,9 @@ class TSP {
     if (alg == "greedy") {
       this.solveGreedy(an);
     }
+    if (alg == "dynamic") {
+      this.solveDynamic(an);
+    }
   }
 
   //function to populate nodes
@@ -50,10 +53,11 @@ class TSP {
     if (this.stepCount != -1) {
       this.stepCount++;
       if (this.solvingType == "naive") {
-        this.evaluatePermutation(this.allPermutationsOfNodes[this.stepCount]);
         if (this.stepCount == this.allPermutationsOfNodes.length) {
           this.stepCount = -1;
           this.solvingType = "";
+        } else {
+          this.evaluatePermutation(this.allPermutationsOfNodes[this.stepCount]);
         }
       }
       if (this.solvingType == "greedy") {
@@ -82,6 +86,7 @@ class TSP {
   evaluatePermutation(permutation) {
     drawPath(permutation);
     let distance = 0;
+    //console.log(permutation);
     for (let i = 0; i < permutation.length - 1; i++) {
       distance += permutation[i].distanceTo(permutation[i + 1]);
     }
@@ -98,8 +103,9 @@ class TSP {
 
   //solve naive function
   solveNaive(isAnimated) {
+    findShortestPathDynamic(this.nodes);
     this.allPermutationsOfNodes = permutations(this.nodes);
-    if(!this.allPermutationsOfNodes) return;
+    if (!this.allPermutationsOfNodes) return;
     this.shortestDistance = Infinity;
     this.shortestPath = [];
     if (isAnimated) {
@@ -146,6 +152,22 @@ class TSP {
       let [u, v] = this.mst[i];
       stroke(0, 255, 0);
       line(this.nodes[u].x, this.nodes[u].y, this.nodes[v].x, this.nodes[v].y);
+    }
+  }
+
+  solveDynamic(isAnimated) {
+    this.shortestDistance = Infinity;
+    this.shortestPath = [];
+    if (isAnimated) {
+      alert(
+        "There is no animation for the DP solution to this, it would look almost exactly the same as the naive solution"
+      );
+    }
+    let tempPath = [];
+    [this.shortestDistance, tempPath] = findShortestPathDynamic(this.nodes);
+    this.shortestPath = [];
+    for (let i = 0; i < tempPath.length; i++) {
+      this.shortestPath.push(this.nodes[tempPath[i]]);
     }
   }
 }
@@ -199,6 +221,79 @@ function findMST(nodes) {
   return [mstWeight, mst];
 }
 
+function findShortestPathDynamic(nodes) {
+  let s = 0;
+  let d = [];
+  for (let i = 0; i < nodes.length; i++) {
+    d[i] = [];
+    for (let j = 0; j < nodes.length; j++) {
+      d[i][j] = nodes[i].distanceTo(nodes[j]);
+    }
+  }
+
+  let DP = {};
+  for (let i = 0; i < nodes.length; i++) {
+    DP[i] = {};
+  }
+
+  function intHas(bitmask, i) {
+    return (bitmask & (1 << i)) !== 0;
+  }
+
+  function intAdd(bitmask, i) {
+    return bitmask | (1 << i);
+  }
+
+  function intRemove(bitmask, i) {
+    return bitmask & ~(1 << i);
+  }
+
+  function tsp(curr, visited) {
+    console.log(curr, visited);
+    if (visited == (1 << nodes.length) - 1) {
+        DP[curr][visited] = null;
+        return [d[curr][0], null];
+    }
+
+    if (DP[curr][visited] != undefined) {
+      return DP[curr][visited];
+    }
+
+    let ans = 100000000;
+    let next = null;
+    for (let i = 0; i < nodes.length; i++) {
+      if (i != curr && !intHas(visited, i)) {
+        visited = intAdd(visited, i);
+        let [res, something] = tsp(i, visited);
+        if (ans > res + d[curr][i]) {
+          ans = res + d[curr][i];
+          next = i;
+        }
+        visited = intRemove(visited, i);
+      }
+    }
+    DP[curr][visited] = [ans, next];
+    return [ans, next];
+  }
+
+  let [ans, next] = tsp(s, 1);
+  let path = [];
+  let curr = 0;
+  let bitmap = 1;
+  console.log(DP);
+  do {
+    path.push(curr);
+    console.log(curr, bitmap);
+    curr = DP[curr][bitmap];
+    if(curr != null) {
+        curr = curr[1];
+        bitmap = intAdd(bitmap, curr);
+    }
+  } while (curr != null);
+  console.log("Dynamic ", ans);
+  return [ans, path];
+}
+
 //class node, having an x and y coordinate as well as draw function
 class Node {
   //constructor function
@@ -210,9 +305,11 @@ class Node {
 
   //draw function
   draw() {
+    //set radious to the inverse of the logarithm of the number of all nodes
+    let r = 20 / Math.log(tsp.nodes.length) / Math.log(2);
     //draw a circle at the x and y coordinate
     fill(255, 255, 255, 255);
-    ellipse(this.x, this.y, 10, 10);
+    ellipse(this.x, this.y, r, r);
   }
 
   //distanceTo function
@@ -255,11 +352,14 @@ function permutations(inputArr) {
     }
     return results;
   }
-  return permute(inputArr);
+  //filter out all permutations that do not start with the first node
+  return permute(inputArr).filter(function (permutation) {
+    return permutation[0] == inputArr[0];
+  });
 }
 
 function closestNodeToNodeNotINArray(node, array, nodes) {
-  console.log(node, array, nodes);
+  //console.log(node, array, nodes);
   let closestNode = null;
   let closestDistance = Infinity;
   for (let i = 0; i < nodes.length; i++) {
@@ -292,6 +392,7 @@ let solvingType = "";
 
 //p5js setup function
 function setup() {
+  frameRate(20);
   tsp.populateNodes(6);
   createCanvas(screenWidth, screenHeight);
   background(background_color);
@@ -300,8 +401,14 @@ function setup() {
 //p5js draw function
 function draw() {
   background(background_color);
-  frameRate(1000);
+  frameRate(parseInt(document.getElementById("speed").value));
   //display framerate on screen
+
+  tsp.drawNodes();
+  tsp.nextStep();
+  tsp.drawShortestPath();
+
+  //DEBUGGING INFO
   fill(255, 255, 255, 255);
   noStroke();
   textSize(20);
@@ -319,8 +426,4 @@ function draw() {
       80
     );
   }
-
-  tsp.drawNodes();
-  tsp.nextStep();
-  tsp.drawShortestPath();
 }
