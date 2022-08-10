@@ -15,6 +15,15 @@ class TSP {
     this.shortestPath = [];
   }
 
+  optimizeSolution(alg) {
+    if (alg == "opt2") {
+      this.solvingType = "opt2";
+    }
+    if (alg == "opt3") {
+      this.solvingType = "opt3";
+    }
+  }
+
   solve(alg, an) {
     this.stepCount = -1;
     this.solvingType = "";
@@ -29,6 +38,9 @@ class TSP {
     }
     if (alg == "aco") {
       this.solveACO(an);
+    }
+    if (alg == "random") {
+      this.solveRandom(an);
     }
   }
 
@@ -50,9 +62,148 @@ class TSP {
     if (document.getElementById("showMST").checked) {
       this.drawMST();
     }
+    //draw an eclipse where node 0 is
+    fill(255, 0, 0, 255);
+    ellipse(this.nodes[0].x, this.nodes[0].y, 30, 30);
+  }
+
+  // optimizing3() {
+  //   for (let i = 1; i < this.shortestPath.length; i++) {
+  //     for (let j = i + 2; j < this.shortestPath.length; j++) {
+  //       for (let _k = j + 2; _k < this.shortestPath.length; _k++) {
+  //         let k = _k % this.shortestPath.length;
+  //         let A = this.shortestPath[i - 1];
+  //         let B = this.shortestPath[i];
+  //         let C = this.shortestPath[j - 1];
+  //         let D = this.shortestPath[j];
+  //         let E = this.shortestPath[k - 1];
+  //         let F = this.shortestPath[k];
+
+  //         let d0 = A.distanceTo(B) + C.distanceTo(D) + E.distanceTo(F);
+  //         let d1 = A.distanceTo(C) + B.distanceTo(D) + E.distanceTo(F);
+  //         let d2 = A.distanceTo(B) + C.distanceTo(E) + D.distanceTo(F);
+  //         let d3 = A.distanceTo(D) + E.distanceTo(B) + C.distanceTo(F);
+  //         let d4 = F.distanceTo(B) + C.distanceTo(D) + E.distanceTo(A);
+
+  //         if (d0 - 5 > d1) {
+  //           let temp = [];
+  //           for (let index = 0; index < i; index++) { // [0:i)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = j; index > i - 1; index--) { // [j:i]
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = j + 1; index < this.shortestPath.length; index++) { //(j:end)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           this.shortestPath = temp;
+  //           return true;
+  //         }
+
+  //         if (d0 - 5 > d2) {
+  //           let temp = [];
+  //           for (let index = 0; index < j; index++) { // [0:j)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k; index > j - 1; index--) { // [k:j]
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           this.shortestPath = temp;
+  //           return true;
+  //         }
+
+  //         if (d0 - 5 > d3) {
+  //           let temp = [];
+  //           for (let index = 0; index < i; index++) { // [0:i)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k; index > i - 1; index--) { // [k:i]
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           this.shortestPath = temp;
+  //           return true;
+  //         }
+
+  //         if (d0 - 5 > d4) {
+  //           let temp = [];
+  //           for (let index = 0; index < j; index++) { // [0:j)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k; index > j - 1; index--) { // [k:j]
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
+  //             temp.push(this.shortestPath[index]);
+  //           }
+  //           this.shortestPath = temp;
+  //           return true;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  optimizing2() {
+    //console.log("Hello")
+    let before = evalPath(this.shortestPath);
+    for (let i = 1; i < this.shortestPath.length; i++) {
+      for (let j = i + 2; j < this.shortestPath.length; j++) {
+        let temp = [];
+        for (let index = 0; index < i; index++) {
+          temp.push(this.shortestPath[index]);
+        }
+        for (let index = j - 1; index >= i; index--) {
+          temp.push(this.shortestPath[index]);
+        }
+        for (let index = j; index < this.shortestPath.length; index++) {
+          temp.push(this.shortestPath[index]);
+        }
+        let after = evalPath(temp);
+        //console.log(before, after);
+        if (after < before) {
+          //console.log("heh")
+          this.shortestPath = [...temp];
+          return true;
+        }
+      }
+    }
+    for (let i = 2; i < this.shortestPath.length; i++) {
+      let temp = [this.shortestPath[0]];
+      for (let index = i; index < this.shortestPath.length; index++) {
+        temp.push(this.shortestPath[index]);
+      }
+      for (let index = i - 1; index > 0; index--) {
+        temp.push(this.shortestPath[index]);
+      }
+      let after = evalPath(temp);
+      if (after < before) {
+        this.shortestPath = [...temp];
+        return true;
+      }
+    }
+    //console.log("Goodbye")
+    return false;
   }
 
   nextStep() {
+    if (this.solvingType == "opt2") {
+      if (this.optimizing2() == false) {
+        this.solvingType = "";
+      }
+    }
+    if (this.solvingType == "opt3") {
+      if (this.optimizing3() == false) {
+        this.solvingType = "";
+      }
+    }
+
     if (this.stepCount != -1) {
       this.stepCount++;
       if (this.solvingType == "naive") {
@@ -78,8 +229,22 @@ class TSP {
           this.solvingType = "";
         }
       }
+      if (this.solvingType == "random") {
+        let randomNode;
+        do {
+          randomNode =
+            this.nodes[Math.floor(Math.random() * this.nodes.length)];
+        } while (this.shortestPath.includes(randomNode));
+        this.shortestPath.push(randomNode);
+        this.calculateShortestDistance();
+        if(this.shortestPath.length == this.nodes.length){
+          this.stepCount = -1;
+          this.solvingType = "";
+        }
+      }
     }
-  } 
+    this.calculateShortestDistance();
+  }
 
   calculateShortestDistance() {
     this.shortestDistance = 0;
@@ -88,9 +253,6 @@ class TSP {
         this.shortestPath[(i + 1) % this.shortestPath.length]
       );
     }
-    this.shortestDistance += this.shortestPath[0].distanceTo(
-      this.shortestPath[this.shortestPath.length - 1]
-    );
   }
 
   evaluatePermutation(permutation) {
@@ -166,6 +328,7 @@ class TSP {
   solveDynamic(isAnimated) {
     if (this.nodes.length > 20) {
       alert("20 is the max for a reasonable solution of this type");
+      return;
     }
     this.shortestDistance = Infinity;
     this.shortestPath = [];
@@ -182,6 +345,25 @@ class TSP {
     }
   }
 
+  solveRandom(isAnimated) {
+    this.shortestDistance = Infinity;
+    this.shortestPath = [];
+    if (isAnimated) {
+      this.stepCount = 0;
+      this.solvingType = "random";
+    } else {
+      while (this.shortestPath.length != this.nodes.length) {
+        let randomNode;
+        do {
+          randomNode =
+            this.nodes[Math.floor(Math.random() * this.nodes.length)];
+        } while (this.shortestPath.includes(randomNode));
+        this.shortestPath.push(randomNode);
+        this.calculateShortestDistance();
+      }
+    }
+  }
+
   updateAntColonies() {
     this.ant_r = simulateNAnts(
       this.ant_d,
@@ -195,14 +377,14 @@ class TSP {
     let curr = 0;
     let visited = new Set();
     this.shortestPath = [];
-    while(visited.size != this.nodes.length) {
+    while (visited.size != this.nodes.length) {
       visited.add(curr);
       this.shortestPath.push(this.nodes[curr]);
       let minn = -Infinity;
       let minnIndex = -1;
       for (let i = 0; i < this.nodes.length; i++) {
-        if(!visited.has(i)) {
-          if(this.ant_r[curr][i] > minn) {
+        if (!visited.has(i)) {
+          if (this.ant_r[curr][i] > minn) {
             minn = this.ant_r[curr][i];
             minnIndex = i;
           }
@@ -219,34 +401,22 @@ class TSP {
     this.ant_decay = document.getElementById("ant_decay").value;
     this.ant_number_of_ants = document.getElementById("ant_number").value;
 
-    if (isAnimated) {
-      this.shortestDistance = Infinity;
-      this.shortestPath = [];
-      this.stepCount = 0;
-      this.solvingType = "aco";
-      this.ant_d = [];
-      this.ant_r = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        this.ant_d.push([]);
-        this.ant_r.push([]);
-        for (let j = 0; j < this.nodes.length; j++) {
-          this.ant_d[i].push(this.nodes[i].distanceTo(this.nodes[j]));
-          this.ant_r[i].push(1);
-        }
+    this.shortestDistance = Infinity;
+    this.shortestPath = [];
+    this.stepCount = 0;
+    this.solvingType = "aco";
+    this.ant_d = [];
+    this.ant_r = [];
+    for (let i = 0; i < this.nodes.length; i++) {
+      this.ant_d.push([]);
+      this.ant_r.push([]);
+      for (let j = 0; j < this.nodes.length; j++) {
+        this.ant_d[i].push(this.nodes[i].distanceTo(this.nodes[j]));
+        this.ant_r[i].push(1);
       }
-    } else {
-      let total = 0;
-      let path = [];
-      [total, path] = antColonyOpt(
-        this.nodes,
-        alpha,
-        beta,
-        decay,
-        number_of_ants,
-        number_of_iterations
-      );
-      this.shortestDistance = total;
-      this.shortestPath = path;
+    }
+    if (!isAnimated) {
+      alert("only in animated does it work");
     }
   }
 }
@@ -298,6 +468,14 @@ function findMST(nodes) {
   //draw mst
 
   return [mstWeight, mst];
+}
+
+function evalPath(path) {
+  total = 0;
+  for (let i = 0; i < path.length; i++) {
+    total += path[i].distanceTo(path[(i + 1) % path.length]);
+  }
+  return total;
 }
 
 function findShortestPathDynamic(nodes) {
@@ -400,6 +578,15 @@ function generateNodes(n) {
   for (let i = 0; i < n; i++) {
     let x = random(screenWidth - screenBuffer * 2);
     let y = random(screenHeight - screenBuffer * 2);
+    //check if any node is within the radius of another node
+    let r = 20;
+    for (let j = 0; j < nodes.length; j++) {
+      if (sqrt(pow(x - nodes[j].x, 2) + pow(y - nodes[j].y, 2)) < 2 * r) {
+        x = random(screenWidth - screenBuffer * 2);
+        y = random(screenHeight - screenBuffer * 2);
+        j = 0;
+      }
+    }
     nodes.push(new Node(x + screenBuffer, y + screenBuffer, i));
   }
   return nodes;

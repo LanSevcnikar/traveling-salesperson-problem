@@ -20,3 +20,17 @@ Dynamic
   Bitshifting used 
   We can go to about 20 or so, doubling the amount
 
+ANT collonie sim
+  Although the logic itself was not hard to implement it became quite quickly clear to me that this alg is a lot more of a by feel alg
+  There are (at least in my code) 4 parameters you have to fiddle with to get a result you like and having them off will result in something that is much slower than 
+  actual greedy algs
+  But if the parameters are fine tooned for the problem (that is dependant on th3e amount of ants, amount of nodes, size of screen and many more things)
+  this is actually a rather fun algoritm to watch
+  To be honest, not the best tho
+  Realistically, I am dissapointed by this alg
+
+Opt optimizings https://en.wikipedia.org/wiki/3-opt
+- it is really sad that this is the best thing you can do, no ammount of fancy algorithms work as well as this. Perhaps there are special cases as I do not have real life data but god damn, this is much better and much simpler than anything else
+https://infonomics-society.org/wp-content/uploads/ijicr/published-papers/volume-6-2015/Performance-Comparison-of-Simulated-Annealing-GA-and-ACO-Applied-to-TSP.pdf
+
+for 40 items, it seems that 40, 1 - 1.5, 2, 0.01, 100 works really well

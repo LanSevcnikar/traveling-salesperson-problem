@@ -27,7 +27,7 @@
 			<option value="dynamic">Dynamic</option>
 			<option value="naive">Brute force</option>
 			<option value="greedy">Greedy</option>
-			<option value="annealing">Annealing</option>
+			<option value="random">Random</option>
 		</select>
 		|
 		<!-- checkbox called animated -->
@@ -39,12 +39,12 @@
 		|
 		<input type="checkbox" id="showMST" value="true" checked> (Show MST)
 		|
-		<select id="opt_alg" onchange="tsp.optimizeSolution()">
-			<option value="aco">Opt 2</option>
-			<option value="dynamic">Opt 3</option>
-			<option value="naive">Crossings</option>
+		<select id="opt_alg">
+			<option value="opt2">Opt 2</option>
+			<option value="opt3">Opt 3</option>
+			<option value="cross">Crossings</option>
 		</select>
-		<button>Optimize</button> |
+		<button onclick="tsp.optimizeSolution(document.getElementById('opt_alg').value)">Optimize</button> |
 		|<input type="number" id="speed" min="2" max="200" value="60">
 		(Framerate)|
 		<div id="acoInput">
@@ -52,7 +52,7 @@
 			<input type="number" min="1" max="200" value="40" id="ant_number"> #ants |
 			<input type="number" min="0" max="10" value="1" step="0.25" id="ant_alpha"> #alpha |
 			<input type="number" min="0" max="10" value="2" step="0.25" id="ant_beta"> #beta |
-			<input type="number" min="0" max="1" value="0.15" step="0.05" id="ant_decay"> #decay |
+			<input type="number" min="0" max="1" value="0.01" step="0.05" id="ant_decay"> #decay |
 			<input type="number" min="0" max="1000" value="100" step="1" id="ant_c"> #c |
 			<input type="checkbox" id="ant_showTrails" checked> (Show trails)
 		</div>
