@@ -50,12 +50,13 @@ function simulateNAnts(d, r, a, b, g, n, nodes) {
   }
 
   for (let k = 0; k < n; k++) {
-    let start = 0;
+    let start = Math.floor(Math.random() * nodes.length);
     let visited = new Set();
     visited.add(start);
     let total = 0;
     let path = [];
     [total, path] = simAnt(start, start, visited);
+    total = Math.pow(total, 1.3);
     for (let i = 1; i < path.length; i++) {
       newR[path[i]][path[i - 1]] += c / total;
       newR[path[i - 1]][path[i]] += c / total;
@@ -64,7 +65,7 @@ function simulateNAnts(d, r, a, b, g, n, nodes) {
     newR[path[path.length - 1]][path[0]] += c / total;
   }
 
-  console.log(newR);
+  //console.log(newR);
   stroke(100);
   if (document.getElementById("ant_showTrails").checked) {
     for (let i = 0; i < nodes.length; i++) {

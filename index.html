@@ -10,54 +10,95 @@
 </head>
 
 <body>
-	<!-- bootstrap make two rows with 5 items in each -->
-	<div class="container">
-		<!-- input for numbers between 2 and 200 -->
-		Traveling Salesman Problem -/-
+	<div class="both">
+		<div class="left">
+			<div class="container">
+				<h4>Traveling salesperson problem</h4>
 
-		<input type="number" id="numberOfNodes" min="2" max="200" value="40">
-		|
-		<button onclick="tsp.populateNodes(document.getElementById('numberOfNodes').value);" class="">
-			Generate
-		</button>
-		<!-- select with 5 options -->
-		|
-		<select id="algorithm" onchange="tsp.stepCount = -1;">
-			<option value="aco">Ant colony opt.</option>
-			<option value="dynamic">Dynamic</option>
-			<option value="naive">Brute force</option>
-			<option value="greedy">Greedy</option>
-			<option value="random">Random</option>
-		</select>
-		|
-		<!-- checkbox called animated -->
-		<input type="checkbox" id="animated" checked> (Animated)
-		|
-		<button onclick="tsp.solve(document.getElementById('algorithm').value, document.getElementById('animated').checked );" class="">
-			Solve
-		</button>
-		|
-		<input type="checkbox" id="showMST" value="true" checked> (Show MST)
-		|
-		<select id="opt_alg">
-			<option value="opt2">Opt 2</option>
-			<option value="opt3">Opt 3</option>
-			<option value="cross">Crossings</option>
-		</select>
-		<button onclick="tsp.optimizeSolution(document.getElementById('opt_alg').value)">Optimize</button> |
-		|<input type="number" id="speed" min="2" max="200" value="60">
-		(Framerate)|
-		<div id="acoInput">
-			<button onclick="tsp.stepCount = -1; tsp.solvingType = ''" > Stop sim </button>
-			<input type="number" min="1" max="200" value="40" id="ant_number"> #ants |
-			<input type="number" min="0" max="10" value="1" step="0.25" id="ant_alpha"> #alpha |
-			<input type="number" min="0" max="10" value="2" step="0.25" id="ant_beta"> #beta |
-			<input type="number" min="0" max="1" value="0.01" step="0.05" id="ant_decay"> #decay |
-			<input type="number" min="0" max="1000" value="100" step="1" id="ant_c"> #c |
-			<input type="checkbox" id="ant_showTrails" checked> (Show trails)
+				<!-- input for numbers between 2 and 200 -->
+				GENERATION:
+				<br><input type="number" id="numberOfNodes" min="2" max="200" value="40"> # nodes
+				<br>
+				<select id="gen_type">
+					<option value="random">Random</option>
+					<option value="smallworld">Small world</option>
+				</select>
+				<br>
+				<button
+					onclick="tsp.populateNodes(document.getElementById('numberOfNodes').value, document.getElementById('gen_type').value);"
+					class="">
+					Generate
+				</button>
+				<br> -------------------- <br>
+				SOLVING:
+				<!-- select with 5 options -->
+				<br>
+				<input type="checkbox" id="animated" checked> (Animated)
+				<br>
+				<select id="algorithm" onchange="tsp.stepCount = -1;">
+					<option value="random">Random</option>
+					<option value="greedy">Greedy</option>
+					<option value="naive">Brute force</option>
+					<option value="dynamic">Dynamic</option>
+					<option value="aco">Ant colony opt.</option>
+				</select>
+				<br>
+				<!-- checkbox called animated -->
+
+				<button
+					onclick="tsp.solve(document.getElementById('algorithm').value, document.getElementById('animated').checked );"
+					class="">
+					Solve
+				</button>
+				<br> -------------------- <br>
+				OPTIMIZATION: <br>
+				<select id="opt_alg">
+					<option value="opt2">Opt 2</option>
+					<option value="ann">Annealing</option>
+				</select> <br>
+				<button onclick="tsp.optimizeSolution(document.getElementById('opt_alg').value)">Optimize</button>
+				<br>
+				-------------------- <br>
+				OTHER: <br>
+				<input type="checkbox" id="showMST" value="true" checked> (Show MST)
+				<br>
+				<input type="number" id="speed" min="2" max="200" value="60"> Framerate
+
+				<div id="acoInput">
+					<br> -------------------- <br>
+					ANT COLONY OPTIMIZATION: <br>
+					<button onclick="tsp.stepCount = -1; tsp.solvingType = ''"> Stop sim </button> <br>
+					<input class="ant_input_num" type="number" min="1" max="200" value="40" id="ant_number"> # ants <br>
+					<input class="ant_input_num" type="number" min="0" max="10" value="1" step="0.25" id="ant_alpha"> pheromones <br>
+					<input class="ant_input_num" type="number" min="0" max="10" value="2" step="0.25" id="ant_beta"> distance <br>
+					<input class="ant_input_num" type="number" min="0" max="1" value="0.01" step="0.05" id="ant_decay"> decay <br>
+					<input class="ant_input_num" type="number" min="0" max="1000" value="100" step="1" id="ant_c"> delta<br>
+					<input type="checkbox" id="ant_showTrails" checked> (Show trails)
+				</div>
+				<div id="annInput">
+					<br> -------------------- <br>
+					ANNEALING: <br>
+					<input type="range" min="0" max="500" step="0.0001" value="50" class="slider" id="ann_temp"
+						onchange="updateAnnTemp()">
+					<input type="number" min="1" max="200" value="40" id="ann_temp_2" disabled><span style="margin-left:0px;">F</span> <br>
+					<input type="number" min="0" max="0.5" value="0.002" step="0.001" id="ann_temp_delta"> Decay
+					<br>
+					<select id="ann_type">
+						<option value="e">Edge swap</option>
+						<option value="v">Vertex swap</option>
+					</select>
+					<br>
+					<button onclick="tsp.solvingType = ''"> Stop opt </button>
+					<br><br><br>
+				</div>
+
+			</div>
 		</div>
-
+		<div class="right" id="right-container">
+		</div>
 	</div>
+	<!-- bootstrap make two rows with 5 items in each -->
+
 
 	<link href="main.css" rel="stylesheet" type="text/css" />
 
@@ -72,10 +113,43 @@
 		body {
 			padding: 0;
 			margin: 0;
+			font-size: large;
+		}
+
+		.both {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.left {
+			background-color: rgb(70, 70, 70);
+			color: azure;
+			width: 275px;
+			height: 100vh;
+			padding-top: 10px;
+			overflow-y: scroll;
+		}
+
+		.right {
+			background-color: blue;
+			width: calc(100vw - 275px);
+			height: 100%;
+		}
+
+		.ant_input_num {
+			width: 80px;
 		}
 
 		canvas {
 			vertical-align: top;
+		}
+
+		#ann_temp_2{
+			background-color: rgb(0,0,0,0);
+			color: azure;
+			width: 55px
 		}
 	</style>
 

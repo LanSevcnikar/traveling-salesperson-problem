@@ -1,6 +1,6 @@
 const background_color = [50, 50, 50, 255];
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight - 100;
+let screenWidth = window.innerWidth - 275;
+let screenHeight = window.innerHeight;
 let screenBuffer = 50;
 
 //class traveling salesman problem
@@ -19,8 +19,11 @@ class TSP {
     if (alg == "opt2") {
       this.solvingType = "opt2";
     }
-    if (alg == "opt3") {
-      this.solvingType = "opt3";
+    if (alg == "ann") {
+      this.solvingType = "ann";
+      this.ann_temp = 500;
+      document.getElementById("ann_temp").value = this.ann_temp;
+      document.getElementById("ann_temp_2").value = this.ann_temp;
     }
   }
 
@@ -45,8 +48,8 @@ class TSP {
   }
 
   //function to populate nodes
-  populateNodes(n) {
-    this.nodes = generateNodes(n);
+  populateNodes(n, t) {
+    this.nodes = generateNodes(n, t);
     this.stepCount = -1;
     this.solvingType = "";
     this.shortestDistance = Infinity;
@@ -66,89 +69,6 @@ class TSP {
     fill(255, 0, 0, 255);
     ellipse(this.nodes[0].x, this.nodes[0].y, 30, 30);
   }
-
-  // optimizing3() {
-  //   for (let i = 1; i < this.shortestPath.length; i++) {
-  //     for (let j = i + 2; j < this.shortestPath.length; j++) {
-  //       for (let _k = j + 2; _k < this.shortestPath.length; _k++) {
-  //         let k = _k % this.shortestPath.length;
-  //         let A = this.shortestPath[i - 1];
-  //         let B = this.shortestPath[i];
-  //         let C = this.shortestPath[j - 1];
-  //         let D = this.shortestPath[j];
-  //         let E = this.shortestPath[k - 1];
-  //         let F = this.shortestPath[k];
-
-  //         let d0 = A.distanceTo(B) + C.distanceTo(D) + E.distanceTo(F);
-  //         let d1 = A.distanceTo(C) + B.distanceTo(D) + E.distanceTo(F);
-  //         let d2 = A.distanceTo(B) + C.distanceTo(E) + D.distanceTo(F);
-  //         let d3 = A.distanceTo(D) + E.distanceTo(B) + C.distanceTo(F);
-  //         let d4 = F.distanceTo(B) + C.distanceTo(D) + E.distanceTo(A);
-
-  //         if (d0 - 5 > d1) {
-  //           let temp = [];
-  //           for (let index = 0; index < i; index++) { // [0:i)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = j; index > i - 1; index--) { // [j:i]
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = j + 1; index < this.shortestPath.length; index++) { //(j:end)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           this.shortestPath = temp;
-  //           return true;
-  //         }
-
-  //         if (d0 - 5 > d2) {
-  //           let temp = [];
-  //           for (let index = 0; index < j; index++) { // [0:j)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k; index > j - 1; index--) { // [k:j]
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           this.shortestPath = temp;
-  //           return true;
-  //         }
-
-  //         if (d0 - 5 > d3) {
-  //           let temp = [];
-  //           for (let index = 0; index < i; index++) { // [0:i)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k; index > i - 1; index--) { // [k:i]
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           this.shortestPath = temp;
-  //           return true;
-  //         }
-
-  //         if (d0 - 5 > d4) {
-  //           let temp = [];
-  //           for (let index = 0; index < j; index++) { // [0:j)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k; index > j - 1; index--) { // [k:j]
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           for (let index = k + 1; index < this.shortestPath.length; index++) { //(k:end)
-  //             temp.push(this.shortestPath[index]);
-  //           }
-  //           this.shortestPath = temp;
-  //           return true;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // }
 
   optimizing2() {
     //console.log("Hello")
@@ -198,10 +118,8 @@ class TSP {
         this.solvingType = "";
       }
     }
-    if (this.solvingType == "opt3") {
-      if (this.optimizing3() == false) {
-        this.solvingType = "";
-      }
+    if (this.solvingType == "ann") {
+      this.simulateAnnealing();
     }
 
     if (this.stepCount != -1) {
@@ -237,13 +155,73 @@ class TSP {
         } while (this.shortestPath.includes(randomNode));
         this.shortestPath.push(randomNode);
         this.calculateShortestDistance();
-        if(this.shortestPath.length == this.nodes.length){
+        if (this.shortestPath.length == this.nodes.length) {
           this.stepCount = -1;
           this.solvingType = "";
         }
       }
     }
     this.calculateShortestDistance();
+  }
+
+  simulateAnnealing() {
+    if (this.shortestPath.length == 0) {
+      return;
+    }
+    this.ann_temp = document.getElementById("ann_temp").value;
+    this.ann_temp =
+      this.ann_temp * (1 - document.getElementById("ann_temp_delta").value);
+    //console.log(this.ann_temp.toFixed(1))
+    document.getElementById("ann_temp").value = this.ann_temp;
+    document.getElementById("ann_temp_2").value = this.ann_temp;
+
+    if (document.getElementById("ann_type").value == "v") {
+      //loop 10 times
+      for (let k = 0; k < 10; k++) {
+        let before = evalPath(this.shortestPath);
+        let newPath = [...this.shortestPath];
+        //choose two random verticies and swap them
+        let i = Math.floor(Math.random() * this.shortestPath.length);
+        let j = Math.floor(Math.random() * this.shortestPath.length);
+        let temp = newPath[i];
+        newPath[i] = newPath[j];
+        newPath[j] = temp;
+        let after = evalPath(newPath);
+        if (after - before < this.ann_temp) {
+          this.shortestPath = [...newPath];
+        }
+      }
+    } else {
+      //loop 10 times
+      //choose two random verticies i and j where j is at least i + 2
+      let before = evalPath(this.shortestPath);
+      let b = false;
+      let count = 0;
+      do {
+        count++;
+        let i = Math.floor(Math.random() * (this.shortestPath.length - 2));
+        let j = Math.floor(
+          Math.random() * (this.shortestPath.length - i - 1) + i + 2
+        );
+        let temp = [];
+        if (j - i < 2) console.log(i, j);
+        for (let index = 0; index < i; index++) {
+          temp.push(this.shortestPath[index]);
+        }
+        for (let index = j - 1; index >= i; index--) {
+          temp.push(this.shortestPath[index]);
+        }
+        for (let index = j; index < this.shortestPath.length; index++) {
+          temp.push(this.shortestPath[index]);
+        }
+        //console.log(temp)
+        let after = evalPath(temp);
+        if (after - before < this.ann_temp) {
+          this.shortestPath = [...temp];
+          b = true;
+        }
+      } while (!b && count < 1000);
+    }
   }
 
   calculateShortestDistance() {
@@ -384,8 +362,17 @@ class TSP {
       let minnIndex = -1;
       for (let i = 0; i < this.nodes.length; i++) {
         if (!visited.has(i)) {
-          if (this.ant_r[curr][i] > minn) {
-            minn = this.ant_r[curr][i];
+          let value =
+            Math.pow(
+              this.ant_r[i][curr],
+              document.getElementById("ant_alpha").value
+            ) /
+            Math.pow(
+              this.ant_d[i][curr],
+              document.getElementById("ant_beta").value
+            );
+          if (value > minn) {
+            minn = value;
             minnIndex = i;
           }
         }
@@ -468,6 +455,10 @@ function findMST(nodes) {
   //draw mst
 
   return [mstWeight, mst];
+}
+
+function findPerfectMatching(nodes){
+  
 }
 
 function evalPath(path) {
@@ -573,23 +564,67 @@ class Node {
 }
 
 //function to generate an array of n nodes
-function generateNodes(n) {
-  let nodes = [];
-  for (let i = 0; i < n; i++) {
-    let x = random(screenWidth - screenBuffer * 2);
-    let y = random(screenHeight - screenBuffer * 2);
-    //check if any node is within the radius of another node
-    let r = 20;
-    for (let j = 0; j < nodes.length; j++) {
-      if (sqrt(pow(x - nodes[j].x, 2) + pow(y - nodes[j].y, 2)) < 2 * r) {
-        x = random(screenWidth - screenBuffer * 2);
-        y = random(screenHeight - screenBuffer * 2);
-        j = 0;
+function generateNodes(n, t) {
+  if (t == "random") {
+    let nodes = [];
+    for (let i = 0; i < n; i++) {
+      let x = random(screenWidth - screenBuffer * 2);
+      let y = random(screenHeight - screenBuffer * 2);
+      //check if any node is within the radius of another node
+      let r = 20;
+      for (let j = 0; j < nodes.length; j++) {
+        if (sqrt(pow(x - nodes[j].x, 2) + pow(y - nodes[j].y, 2)) < 2 * r) {
+          x = random(screenWidth - screenBuffer * 2);
+          y = random(screenHeight - screenBuffer * 2);
+          j = 0;
+        }
       }
+      nodes.push(new Node(x + screenBuffer, y + screenBuffer, i));
     }
-    nodes.push(new Node(x + screenBuffer, y + screenBuffer, i));
+    return nodes;
   }
-  return nodes;
+  if (t == "smallworld") {
+    let m = Math.floor(Math.sqrt(n) / 2);
+    let cities = [];
+    let nodes = [];
+    for (let index = 0; index < m; index++) {
+      let x = random(screenWidth - screenBuffer * 2) + screenBuffer;
+      let y = random(screenHeight - screenBuffer * 2) + screenBuffer;
+      cities.push(new Node(x, y, index));
+    }
+
+    for (let index = 0; index < n; index++) {
+      //choose random city
+      let city = cities[Math.floor(Math.random() * cities.length)];
+      //chose random x and y offset smaller than screen divided by m
+      let x = random(-100, 100);
+      let y = random(-100, 100);;
+      do {
+        //if x or y outside of screen, choose new ones
+        if (
+          city.x + x < screenBuffer ||
+          city.x + x > screenWidth - screenBuffer
+        ) {
+          x = random(-screenWidth / m, screenWidth / m);
+        }
+        if (
+          city.y + y < screenBuffer ||
+          city.y + y > screenHeight - screenBuffer
+        ) {
+          y = random(-screenHeight / m, screenHeight / m);
+        }
+      } while (
+        city.x + x < screenBuffer ||
+        city.x + x > screenWidth - screenBuffer ||
+        city.y + y < screenBuffer ||
+        city.y + y > screenHeight - screenBuffer
+      );
+      //create a node at that position
+      nodes.push(new Node(city.x + x, city.y + y, index));
+    }
+    console.log(cities, nodes);
+    return nodes;
+  }
 }
 
 //function that takes as input an array and returns all permutations of it
@@ -652,11 +687,15 @@ let tsp = new TSP();
 let solvingType = "";
 
 //p5js setup function
+
+let canvas; 
 function setup() {
   frameRate(20);
-  tsp.populateNodes(10);
-  createCanvas(screenWidth, screenHeight);
+  tsp.populateNodes(10, "random");
+  canvas = createCanvas(screenWidth, screenHeight);
   background(background_color);
+  canvas.parent('right-container');
+
 }
 
 //p5js draw function
@@ -689,8 +728,27 @@ function draw() {
   }
 
   if (document.getElementById("algorithm").value == "aco") {
-    document.getElementById("acoInput").style.visibility = "visible";
+    document.getElementById("acoInput").style.display = "inline";
   } else {
-    document.getElementById("acoInput").style.visibility = "hidden";
+    document.getElementById("acoInput").style.display = "none";
   }
+
+  if (document.getElementById("opt_alg").value == "ann") {
+    document.getElementById("annInput").style.display = "inline";
+  } else {
+    document.getElementById("annInput").style.display = "none";
+  }
+}
+
+//function on window resize p5js
+function windowResized() {
+  screenHeight = window.innerHeight;
+  screenWidth = window.innerWidth - 275;
+  resizeCanvas(screenWidth, screenHeight);
+  
+}
+
+function updateAnnTemp(){
+  document.getElementById('ann_temp_2').value = document.getElementById('ann_temp').value   
+
 }
